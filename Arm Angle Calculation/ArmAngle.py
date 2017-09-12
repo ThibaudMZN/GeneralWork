@@ -5,151 +5,79 @@ import cv2
 import math
 import numpy as np
 
-##class trackerPoint(object):
-##    def __init__(self,x,y,size,frame):
-##        self.tracker = cv2.TrackerMIL_create()
-##        self.bbox = (x-size/2,y-size/2,size,size)
-##        ok = self.tracker.init(frame,self.bbox)
-##        self.x = 0
-##        self.y = 0
-##        self.size = size
-##    def update(self,frame):
-##        ok, self.bbox = self.tracker.update(frame)
-##        if ok:
-##            self.x = int(self.bbox[0] + self.size/2)
-##            self.y = int(self.bbox[1] + self.size/2)
-##            p1 = (self.x-2,self.y-2)
-##            p2 = (self.x+2,self.y+2)
-##            cv2.rectangle(frame, p1, p2, (0,0,255),-1)
-##
-##def findMiddle(x0,x1,y0,y1):
-##    x = int((x0+x1)/2)
-##    y = int((y0+y1)/2)
-##    return x,y
-##
-##def drawMiddle(x,y,frame):
-##    p1 = (x-2,y-2)
-##    p2 = (x+2,y+2)  
-##    cv2.rectangle(frame, p1, p2, (255,0,0),-1)
-##
-##def Dist(p1,p2):
-##    x1=p1[0]
-##    y1=p1[1]
-##    x2=p2[0]
-##    y2=p2[1]
-##    return math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
-##
-##def calcAngle(d):
-##    a = d[0]
-##    b = d[1]
-##    c = d[2]
-##    angRad = math.acos(((a*a)+(b*b)-(c*c))/(2*a*b))
-##    return math.degrees(angRad)
-##        
-##
-##cap = cv2.VideoCapture('Video.mp4')
-##fourcc = cv2.VideoWriter_fourcc(*'XVID')
-##out = cv2.VideoWriter('output.avi',fourcc, 30.0, (1280,720))
-##
-##kernel = np.ones((3,3),np.uint8)
-##
-##ret, frame = cap.read()
-##thresh = cv2.inRange(frame,(150,150,150),(255,255,255))
-##frame = cv2.erode(thresh,kernel,iterations = 1)
-##        
-##
-##TrackersList = [(548,389),(574,454),(613,374),(699,396),(564,274),(605,252)]
-##
-##Trackers = []
-##for t in TrackersList:
-##    Trackers.append(trackerPoint(t[0],t[1],40,frame))
-##
-##while(cap.isOpened()):
-##    ret, frame = cap.read()
-##    if(frame is None):
-##        break
-##    thresh = cv2.inRange(frame,(150,150,150),(255,255,255))
-##    frame = cv2.erode(thresh,kernel,iterations = 1)
-##    for t in Trackers:
-##        t.update(frame)
-##    j = 0
-##    m = []
-##    for i in range(int(len(Trackers)/2)):
-##        x0 = Trackers[j].x
-##        x1 = Trackers[j+1].x
-##        y0 = Trackers[j].y
-##        y1 = Trackers[j+1].y
-##        j += 2
-##        m.append(findMiddle(x0,x1,y0,y1))
-##
-##    for i in range(len(m)-1):
-##        p1 = m[i]
-##        p2 = m[i+1]
-##        cv2.line(frame,p1,p2,(255,0,255),2)
-##
-##    d = []
-##    j = 0
-##    for i in range(len(m)):
-##        p1 = m[j]
-##        if(j == len(m)-1):
-##            p2 = m[0]
-##        else:
-##            p2 = m[j+1]
-##        d.append(Dist(p1,p2))
-##        j += 1
-##
-##    for i in m:
-##        drawMiddle(i[0],i[1],frame)
-##
-##    ang = calcAngle(d)
-##    strAng = "Angle = %2.2f degrees" % ang
-##
-##    cv2.putText(frame,strAng,(800,100),cv2.FONT_HERSHEY_DUPLEX,1,(255,255,255))
-##    
-##    cv2.imshow('frame',frame)
-##    out.write(frame)
-##    
-##    if cv2.waitKey(1) & 0xFF == ord('q'):
-##        break
-##
-##cap.release()
-##out.release()
-##cv2.destroyAllWindows()
+class trackerPoint(object):
+   def __init__(self,x,y,size,frame):
+       self.tracker = cv2.TrackerKCF_create()
+       self.bbox = (x-size/2,y-size/2,size,size)
+       self.tracker.init(frame,self.bbox)
+       self.x = x
+       self.y = y
+       self.size = size
+       self.ptsize = 4
+   def update(self,frame,frameToDrawOn):
+       ok, self.bbox = self.tracker.update(frame)
+       if ok:
+           self.x = int(self.bbox[0] + self.size/2)
+           self.y = int(self.bbox[1] + self.size/2)
+           p1 = (self.x-self.ptsize,self.y-self.ptsize)
+           p2 = (self.x+self.ptsize,self.y+self.ptsize)
+           cv2.rectangle(frameToDrawOn, p1, p2, (0,0,255),-1)
 
+def Dist(p1,p2):
+   x1=p1.x
+   y1=p1.y
+   x2=p2.x
+   y2=p2.y
+   return math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
+
+def calcAngle(pTrack):
+    a = Dist(pTrack[0],pTrack[1])
+    b = Dist(pTrack[1],pTrack[2])
+    c = Dist(pTrack[2],pTrack[0])
+    angRad = math.acos(((a*a)+(b*b)-(c*c))/(2*a*b))
+    return math.degrees(angRad)
+
+def drawLine(frame,pTrack):
+    cv2.line(frame,(pTrack[0].x,pTrack[0].y),(pTrack[1].x,pTrack[1].y),(255,0,255),2)
+    cv2.line(frame,(pTrack[1].x,pTrack[1].y),(pTrack[2].x,pTrack[2].y),(255,0,255),2)
 
 def main():
     kernel = np.ones((3,3),np.uint8)
     cap = cv2.VideoCapture('Video.mp4')
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter('output.avi',fourcc, 30.0, (1280,720))
+    ret, frame = cap.read()
+    pList = [(561,421),(656,385),(584,263)]
+    pTrack = []
+
+    for pt in pList:
+        pTrack.append(trackerPoint(pt[0],pt[1],80,frame))
+
     while(cap.isOpened()):
         ret, frame = cap.read()
         if(frame is None):
             break
-        frame = frame[0:550,0:1280,:]
-        #thresh1 = cv2.inRange(frame,(150,150,150),(255,255,255))
-        #thresh1 = cv2.erode(thresh1,kernel,iterations = 5)
-        #thresh1 = cv2.dilate(thresh1,kernel,iterations = 1)
+        thresh1 = cv2.inRange(frame,(170,170,170),(255,255,255))
+        thresh1 = cv2.erode(thresh1,kernel,iterations = 3)
+        thresh1 = cv2.dilate(thresh1,kernel,iterations = 3)
 
-        edges = cv2.Canny(frame,50,150,apertureSize = 3)
-        #edges = cv2.dilate(edges,kernel,iterations = 3)
+        res = cv2.bitwise_and(frame,frame,mask=thresh1)
+        for p in pTrack:
+            p.update(res, frame)
 
-        lines = cv2.HoughLines(edges,1,np.pi/180,70)
-        for i in range(len(lines)):
-            for rho,theta in lines[i]:
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a*rho
-                y0 = b*rho
-                x1 = int(x0 + 1000*(-b))
-                y1 = int(y0 + 1000*(a))
-                x2 = int(x0 - 1000*(-b))
-                y2 = int(y0 - 1000*(a))
+        drawLine(frame,pTrack)
+        ang = calcAngle(pTrack)
+        strAng = "%2.2f deg" % ang
+        cv2.putText(frame,strAng,(pTrack[1].x+40,pTrack[1].y),cv2.FONT_HERSHEY_DUPLEX,1,(255,255,255))
 
-                cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),2)
-        
         cv2.imshow('frame',frame)
+        out.write(frame)
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
     cap.release()
+    out.release()
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
