@@ -7,7 +7,7 @@ General work on different subjects
 * ArmAngleCalculation : Calculating angle of an arm for rehab
 * DrumsClassification : Trying to classify drum type using kNN Model (Currently 60% accuracy)
 * HTMLRequests : Parsing HTML pages to request selected type of data (images, text..)
-* SimplePythonPerceptron : Creating a simple Perceptron Model
+* SimplePerceptron : Creating a simple Perceptron Model
 
 ## Usage
 
