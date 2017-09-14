@@ -67,10 +67,10 @@ def getPower(dat,A,D,R):
 ##    return ptot
 
 def loadRawDatas():
-    with np.load('Dataset_raw/Drums_8Classes_Train_Light.npz') as data:
+    with np.load('Dataset_raw/Drums_8Classes_Train.npz') as data:
         train = data['train']
         train_labels = data['train_labels']
-    with np.load('Dataset_raw/Drums_8Classes_Test_Light.npz') as data:
+    with np.load('Dataset_raw/Drums_8Classes_Test.npz') as data:
         test = data['test']
         test_labels = data['test_labels']
     return train, train_labels, test, test_labels
