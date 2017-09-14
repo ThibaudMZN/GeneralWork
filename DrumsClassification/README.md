@@ -34,4 +34,5 @@ I'm trying to compare a simple kNN ML model and a Perceptron model, here are the
 | Classes / Features  |   kNN   |  Perceptron   |
 | ------------------- | ------- | ------------- |
 | 2 / 2               | 56,25%  | Content Cell  |
+| ------------------- | ------- | ------------- |
 | Content Cell        | Conten  | Content Cell  |
